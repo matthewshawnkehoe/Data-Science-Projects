@@ -72,7 +72,8 @@ X_train_baseline = vectorizer.fit_transform(X_train)
 model = ComplementNB()
 model.fit(X_train_baseline, y_train)
 
-# Dash.default_mode = "jupyterlab"
+# Locations
+cairo_loc = '/assets/cairo.jpg'
 
 # Define the prediction function
 def get_prediction(text):
@@ -103,6 +104,7 @@ def create_app_layout():
         html.H5(children='Your Personalized Travel Recommendation Awaits:', style={'textAlign': 'center', 'color': '#3366cc'}),
         html.H4(id='my-output', style={'textAlign': 'center', 'color': '#3366cc'}),
         html.Br(),
+        html.Img(id='image', style={'width': '50%', 'margin': '0 auto', 'display': 'block'}),
         html.Hr(),
         html.H5(children='Embark on a Journey of Discovery', style={'margin-left': '10%', 'margin-right': '10%', 'color': '#3366cc'}),
         html.Div(children="Join us on a journey fueled by data from 50,000 attractions across 30 locations on Trip Advisor. Our cutting-edge Complement Naive Bayes algorithm ensures tailor-made suggestions for your dream adventure, making every exploration memorable.",
@@ -124,7 +126,7 @@ def run_travel_app():
     # Set the app layout
     app.layout = create_app_layout()
 
-    # Set the app callback
+    # Set the app callbacks
     @app.callback(
         Output(component_id='my-output', component_property='children'),
         Input(component_id='my-input', component_property='value')
@@ -138,10 +140,55 @@ def run_travel_app():
             return f"Explore {top_pred}!"
         else:
             return "Error during prediction"
+            
+    @app.callback(
+    Output(component_id='image', component_property='src'),
+    Input('my-output', 'children'))
+    def update_image(input_value):
+        if not input_value:  # Check if input is empty
+            return "Please enter some text to get a recommendation", ''
+
+        top_pred = get_prediction(input_value)
+        if top_pred is not None:
+            # Set the image source based on the predicted location
+            if top_pred == 'Moscow, Russia':
+                image_src = '/assets/moscow.jpg'
+            elif top_pred == 'Tokyo, Japan':
+                image_src = '/assets/tokyo.jpg'
+            elif top_pred == 'South Korea, East Asia':
+                image_src = '/assets/south_korea.jpg'
+            elif top_pred == 'Norway, Europe':
+                image_src = '/assets/norway.jpg'
+            elif top_pred == 'New Zealand, Pacific Ocean':
+                image_src = '/assets/new_zealand.jpg'
+            elif top_pred == 'Bali, Indonesia':
+                image_src = '/assets/bali.jpg'
+            elif top_pred == 'Rome, Italy':
+                image_src = '/assets/rome.jpg'
+            elif top_pred == 'Hokkaido, Japan':
+                image_src = '/assets/hokkaido.jpg'
+            elif top_pred == 'New York City, New York':
+                image_src = '/assets/new_york_city.jpg'
+            elif top_pred == 'Paris, France':
+                image_src = '/assets/paris.jpg'
+            elif top_pred == 'Bangkok, Tahiland':
+                image_src = '/assets/bangkok.jpg'
+            elif top_pred == 'Prague, Czech Republic':
+                image_src = '/assets/prague.jpg'
+            elif top_pred == 'Rajasthan, India':
+                image_src = '/assets/rajasthan.jpg'
+            elif top_pred == 'Singapore, Asia':
+                image_src = '/assets/singapore.jpg'
+            else:
+                image_src = '/assets/cairo.jpg'
+            
+            return image_src
+        else:
+            return "Error during prediction", ''
 
     # Run the app
     if __name__ == '__main__':
-        app.run_server(host='localhost')
+        app.run_server(debug=True, host='localhost', port=8064)
 
 # Run the Dash app
 run_travel_app()
