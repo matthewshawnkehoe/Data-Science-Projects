@@ -7,7 +7,7 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import ComplementNB
 from dash import dcc, html, Dash
@@ -66,7 +66,7 @@ y = travel_df['Location']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Create vectorizer and train the model
-vectorizer = CountVectorizer(analyzer='word', decode_error='ignore', ngram_range=(1, 2))
+vectorizer = TfidfVectorizer(analyzer='word', decode_error='ignore', ngram_range=(1, 2))
 X_train_baseline = vectorizer.fit_transform(X_train)
 
 model = ComplementNB()
