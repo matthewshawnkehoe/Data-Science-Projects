@@ -142,7 +142,7 @@ def create_app_layout():
         html.Img(id='image', style={'width': '50%', 'margin': '0 auto', 'display': 'block'}),
         html.Hr(),
         html.H5(children='Embark on a Journey of Discovery', style={'margin-left': '10%', 'margin-right': '10%', 'color': '#3366cc'}),
-        html.Div(children="Join us on a journey fueled by data from 50,000 attractions across 30 locations on Trip Advisor. Our state-of-the-art BERT-based similarity scoring ensures personalized recommendations for your dream adventure, making every exploration unforgettable.",
+        html.Div(children="Join us on a journey fueled by data from over 50,000 attractions across 30 locations on Trip Advisor. Our state-of-the-art BERT-based similarity scoring ensures personalized recommendations for your dream adventure, making every exploration unforgettable. Our advanced algorithm is dedicated to crafting personalized recommendations, ensuring that every adventure is uniquely yours, leaving a lasting impression with each step you take.",
                  style={'margin-left': '10%', 'margin-right': '10%', 'color': '#3366cc'}),
     ], style={'background-color': '#f2f2f2'})  # Set the default background color
 
