@@ -72,8 +72,39 @@ X_train_baseline = vectorizer.fit_transform(X_train)
 model = ComplementNB()
 model.fit(X_train_baseline, y_train)
 
-# Locations
-cairo_loc = '/assets/cairo.jpg'
+# Define the image sources for each location
+location_images = {
+    'Moscow, Russia': '/assets/moscow.jpg',
+    'Tokyo, Japan': '/assets/tokyo.jpg',
+    'South Korea, East Asia': '/assets/south_korea.jpg',
+    'Norway, Europe': '/assets/norway.jpg',
+    'New Zealand, Pacific Ocean': '/assets/new_zealand.jpg',
+    'Bali, Indonesia': '/assets/bali.jpg',
+    'Rome, Italy': '/assets/rome.jpg',
+    'Hokkaido, Japan': '/assets/hokkaido.jpg',
+    'New York City, New York': '/assets/new_york_city.jpg',
+    'Paris, France': '/assets/paris.jpg',
+    'Bangkok, Tahiland': '/assets/bangkok.jpg',
+    'Prague, Czech Republic': '/assets/prague.jpg',
+    'Rajasthan, India': '/assets/rajasthan.jpg',
+    'Singapore, Asia': '/assets/singapore.jpg',
+    'Melbourne, Austrailia': '/assets/melbourne.jpg',
+    'Berlin, Germany': '/assets/berlin.jpg',
+    'Mexico City, Mexico': '/assets/mexico_city.jpg',
+    'Las Vegas, Nevada': '/assets/las_vegas.jpg',
+    'Stockholm, Sweden': '/assets/stockholm.jpg',
+    'Bahamas, Atlantic Ocean': '/assets/bahamas.jpg',
+    'Bahai, Brazil': '/assets/bahai.jpg',
+    'Amsterdam, Netherlands': '/assets/amsterdam.jpg',
+    'Hong Kong, China': '/assets/hong_kong.jpg',
+    'Honolulu, Hawaii': '/assets/honolulu.jpg',
+    'San Franscisco, California': '/assets/san_francisco.jpg',
+    'Sydney, Austrailia': '/assets/sydney.jpg',
+    'Toronto, Canada': '/assets/toronto.jpg',
+    'Swiss Alps, Switzerland': '/assets/swiss_alps.jpg',
+    'Rio de Janeiro, Brazil': '/assets/rio_de_janeiro.jpg',
+    'Atacama Desert, Chile': '/assets/atacama_desert.jpg'
+}
 
 # Define the prediction function
 def get_prediction(text):
@@ -96,7 +127,7 @@ def create_app_layout():
         html.H4(children='Craft your dream journey by sharing your ideal vacation activities.', style={'textAlign': 'center', 'color': '#3366cc'}),
         html.Br(),
         html.Div([
-            "What's your dream vacation activity? Tell us, and let's create your perfect adventure:  ",
+            html.Span("What's your dream vacation activity? Tell us, and let's create your perfect adventure:  ", style={'color': '#3366cc'}),
             dcc.Input(id='my-input', value='', type='text',
                       placeholder='e.g., Sailing under the Northern Lights', style={'width': '65%', 'color': '#3366cc'}),
         ], style={'margin-left': '10%', 'margin-right': '10%'}),
@@ -151,44 +182,14 @@ def run_travel_app():
         top_pred = get_prediction(input_value)
         if top_pred is not None:
             # Set the image source based on the predicted location
-            if top_pred == 'Moscow, Russia':
-                image_src = '/assets/moscow.jpg'
-            elif top_pred == 'Tokyo, Japan':
-                image_src = '/assets/tokyo.jpg'
-            elif top_pred == 'South Korea, East Asia':
-                image_src = '/assets/south_korea.jpg'
-            elif top_pred == 'Norway, Europe':
-                image_src = '/assets/norway.jpg'
-            elif top_pred == 'New Zealand, Pacific Ocean':
-                image_src = '/assets/new_zealand.jpg'
-            elif top_pred == 'Bali, Indonesia':
-                image_src = '/assets/bali.jpg'
-            elif top_pred == 'Rome, Italy':
-                image_src = '/assets/rome.jpg'
-            elif top_pred == 'Hokkaido, Japan':
-                image_src = '/assets/hokkaido.jpg'
-            elif top_pred == 'New York City, New York':
-                image_src = '/assets/new_york_city.jpg'
-            elif top_pred == 'Paris, France':
-                image_src = '/assets/paris.jpg'
-            elif top_pred == 'Bangkok, Tahiland':
-                image_src = '/assets/bangkok.jpg'
-            elif top_pred == 'Prague, Czech Republic':
-                image_src = '/assets/prague.jpg'
-            elif top_pred == 'Rajasthan, India':
-                image_src = '/assets/rajasthan.jpg'
-            elif top_pred == 'Singapore, Asia':
-                image_src = '/assets/singapore.jpg'
-            else:
-                image_src = '/assets/cairo.jpg'
-            
+            image_src = location_images.get(top_pred, '/assets/atacama_desert.jpg')
             return image_src
         else:
             return "Error during prediction", ''
 
     # Run the app
     if __name__ == '__main__':
-        app.run_server(debug=True, host='localhost', port=8064)
+        app.run_server(debug=True, host='localhost', port=8065)
 
 # Run the Dash app
 run_travel_app()
