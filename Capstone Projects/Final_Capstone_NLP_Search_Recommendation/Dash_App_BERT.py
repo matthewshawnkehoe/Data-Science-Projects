@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from dash import dcc, html, Dash
 from dash.dependencies import Input, Output
 import tensorflow as tf
+import tensorflow_text as text
 import tensorflow_hub as hub
 from sklearn.metrics.pairwise import cosine_similarity
 
