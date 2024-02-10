@@ -60,6 +60,22 @@ def clean_text_column(df, column_name):
 
 # Apply the clean text function to the "Things to Do"
 clean_text_column(travel_df, 'Text')
+
+# Preprocess user text
+def preprocess_text(text):
+    """
+    Preprocesses the input text by converting to lowercase and removing non-alphanumeric characters.
+
+    Parameters:
+    - text (str): The input text to be preprocessed.
+
+    Returns:
+    - str: Preprocessed text.
+    """
+    text = text.lower()
+    text = re.sub('[^A-Za-z0-9]+', ' ', text)
+    return text
+
 # Split the data for training and testing
 X = travel_df['Text']
 y = travel_df['Location']
@@ -166,6 +182,7 @@ def run_travel_app():
         if not input_value:  # Check if input is empty
             return "Please enter some text to get a recommendation"
         
+        input_value = preprocess_text(input_value)
         top_pred = get_prediction(input_value)
         if top_pred is not None:
             return f"Explore {top_pred}!"
@@ -174,18 +191,21 @@ def run_travel_app():
             
     @app.callback(
     Output(component_id='image', component_property='src'),
-    Input('my-output', 'children'))
+    Input('my-output', 'children')
+    )
     def update_image(input_value):
         if not input_value:  # Check if input is empty
-            return "Please enter some text to get a recommendation", ''
+            return '/assets/atacama_desert.jpg'  # Return the default image source
 
+        input_value = preprocess_text(input_value)
         top_pred = get_prediction(input_value)
         if top_pred is not None:
             # Set the image source based on the predicted location
             image_src = location_images.get(top_pred, '/assets/atacama_desert.jpg')
             return image_src
         else:
-            return "Error during prediction", ''
+            return '/assets/atacama_desert.jpg'  # Return the default image source in case of an error
+
 
     # Run the app
     if __name__ == '__main__':

@@ -90,6 +90,21 @@ travel_df['encodings'] = travel_df['Text'].apply(lambda x: get_bert_embeddings(x
 # Create a function to compute similarity scores
 def compute_similarity_score(query_encoding, encodings):
     return cosine_similarity([np.squeeze(encodings)], [query_encoding])[0][0]
+    
+# Preprocess text
+def preprocess_text(text):
+    """
+    Preprocesses the input text by converting to lowercase and removing non-alphanumeric characters.
+
+    Parameters:
+    - text (str): The input text to be preprocessed.
+
+    Returns:
+    - str: Preprocessed text.
+    """
+    text = text.lower()
+    text = re.sub('[^A-Za-z0-9]+', ' ', text)
+    return text
 
 # Define the image sources for each location
 location_images = {
@@ -175,6 +190,7 @@ def run_travel_app():
             return "Please enter some text to get a recommendation"
        
         # Compute BERT embeddings for the input text
+        input_value = preprocess_text(input_value)
         query_encoding = get_bert_embeddings(input_value, preprocessor, encoder)
         query_encoding = tf.squeeze(query_encoding, axis=0)  # Squeeze the batch dimension
        
@@ -192,20 +208,31 @@ def run_travel_app():
     @app.callback(
         Output(component_id='image', component_property='src'),
         Input('my-output', 'children'))
-    )
     def update_image(input_value):
         if not input_value:  # Check if input is empty
             return "Please enter some text to get a recommendation", ''
 
         # Get the predicted location
-        top_location = input_value
+        input_value = preprocess_text(input_value)
+        query_encoding = get_bert_embeddings(input_value, preprocessor, encoder)
+        query_encoding = tf.squeeze(query_encoding, axis=0)  # Squeeze the batch dimension
+       
+        # Convert BERT embeddings in DataFrame to 2D array
+        encodings = np.stack(travel_df['encodings'].apply(lambda x: np.array(x)).values)
+        encodings = np.squeeze(encodings, axis=1)  # Squeeze extra dimension
+       
+        # Compute similarity scores between input text and all locations
+        similarity_scores = cosine_similarity([query_encoding.numpy()], encodings)[0]  # Compute cosine similarity
+        top_location_index = np.argmax(similarity_scores)
+        top_location = travel_df.loc[top_location_index, 'Location']
+       
         # Set the image source based on the predicted location
         image_src = location_images.get(top_location, '/assets/atacama_desert.jpg')
         return image_src
 
     # Run the app
     if __name__ == '__main__':
-        app.run_server(debug=True, host='localhost', port=8066)
+        app.run_server(debug=True, host='localhost', port=8067)
 
 # Run the Dash app
 run_travel_app()
