@@ -7,8 +7,6 @@ import nltk
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.model_selection import train_test_split
 from dash import dcc, html, Dash
 from dash.dependencies import Input, Output
 import tensorflow as tf
@@ -18,9 +16,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 # Download stopwords from nltk
 nltk.download(['stopwords', 'wordnet'])
+nltk.download('punkt')
 
 # Read the travel data
-travel_df = pd.read_csv('C:/Users/mskeh/Documents/GitHub/Thinkful/Capstone Projects/Final_Capstone_NLP_Search_Recommendation/Data/all_things_to_do.csv')
+travel_df = pd.read_csv('~/dev/Data_Analysis/Data/all_things_to_do.csv')
 
 def clean_text_column(df, column_name):
     """
@@ -85,8 +84,12 @@ def get_bert_embeddings(text, preprocessor, encoder):
     outputs = encoder(encoder_inputs)
     return outputs['pooled_output']
 
-# Apply the get_bert_embedding function to the 'Text' column
+# Compute BERT embeddings for all texts in the 'Text' column
 travel_df['encodings'] = travel_df['Text'].apply(lambda x: get_bert_embeddings(x, preprocessor, encoder))
+
+# Create a function to compute similarity scores
+def compute_similarity_score(query_encoding, encodings):
+    return cosine_similarity([np.squeeze(encodings)], [query_encoding])[0][0]
 
 # Define the image sources for each location
 location_images = {
@@ -170,18 +173,25 @@ def run_travel_app():
     def update_output_div(input_value):
         if not input_value:  # Check if input is empty
             return "Please enter some text to get a recommendation"
-        
-        # Compute similarity scores with BERT embeddings
-        query_encoding = get_bert_embeddings(input_value, preprocessor, encoder)[0]
-        travel_df['similarity_score'] = travel_df['encodings'].apply(lambda x: cosine_similarity([x], [query_encoding])[0][0])
-        
-        # Get the location with the highest similarity score
-        top_location = travel_df.loc[travel_df['similarity_score'].idxmax(), 'Location']
+       
+        # Compute BERT embeddings for the input text
+        query_encoding = get_bert_embeddings(input_value, preprocessor, encoder)
+        query_encoding = tf.squeeze(query_encoding, axis=0)  # Squeeze the batch dimension
+       
+        # Convert BERT embeddings in DataFrame to 2D array
+        encodings = np.stack(travel_df['encodings'].apply(lambda x: np.array(x)).values)
+        encodings = np.squeeze(encodings, axis=1)  # Squeeze extra dimension
+       
+        # Compute similarity scores between input text and all locations
+        similarity_scores = cosine_similarity([query_encoding.numpy()], encodings)[0]  # Compute cosine similarity
+        top_location_index = np.argmax(similarity_scores)
+        top_location = travel_df.loc[top_location_index, 'Location']
+       
         return f"Explore {top_location}!"
-
+    
     @app.callback(
         Output(component_id='image', component_property='src'),
-        Input(component_id='my-output', component_property='children')
+        Input('my-output', 'children'))
     )
     def update_image(input_value):
         if not input_value:  # Check if input is empty
